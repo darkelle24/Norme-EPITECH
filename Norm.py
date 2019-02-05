@@ -344,13 +344,13 @@ def check_math_signe(fichier, filename, line_str, line, header, first, signe):
 
 def check_space_with_math_char(fichier, filename, line_str, line, header, first):
     header,first = check_equal(fichier, filename, line_str, line, header, first)
-    header,first = check_sup(fichier, filename, line_str, line, header, first)
-    header,first = check_inf(fichier, filename, line_str, line, header, first)
+    ##header,first = check_sup(fichier, filename, line_str, line, header, first)
+    ##header,first = check_inf(fichier, filename, line_str, line, header, first)
     header,first = check_dif(fichier, filename, line_str, line, header, first)
     header,first = check_comp_signe(fichier, filename, line_str, line, header, first, '||')
     header,first = check_comp_signe(fichier, filename, line_str, line, header, first, '&&')
-    header,first = check_math_signe(fichier, filename, line_str, line, header, first, '+')
-    header,first = check_math_signe(fichier, filename, line_str, line, header, first, '-')
+    ##header,first = check_math_signe(fichier, filename, line_str, line, header, first, '+')
+    ##header,first = check_math_signe(fichier, filename, line_str, line, header, first, '-')
     header,first = check_math_signe(fichier, filename, line_str, line, header, first, '/')
     header,first = check_math_signe(fichier, filename, line_str, line, header, first, '%')
     return(header,first)

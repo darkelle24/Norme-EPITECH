@@ -130,11 +130,12 @@ def count_line(filename):
             num_lines += 1
     return (num_lines)
 
-def check_space_after_word(fichier, filename, line_str, line, header, first):
+def check_space_after_word(fichier, filename, line_str, line, header, first, indentation):
     header,first = check_coma(fichier, filename, line_str, line, header, first)
-    header,first = check_while(fichier, filename, line_str, line, header, first)
-    header,first = check_if(fichier, filename, line_str, line, header, first)
-    header,first = check_return(fichier, filename, line_str, line, header, first)
+    if (indentation != 0):
+        header,first = check_while(fichier, filename, line_str, line, header, first)
+        header,first = check_if(fichier, filename, line_str, line, header, first)
+        header,first = check_return(fichier, filename, line_str, line, header, first)
     return(header,first)
 
 def not_in_quote(line_str, position_find):
@@ -279,9 +280,40 @@ def check_space_with_math_char(fichier, filename, line_str, line, header, first)
     header,first = check_math_signe(fichier, filename, line_str, line, header, first, '+')
     header,first = check_math_signe(fichier, filename, line_str, line, header, first, '-')
     header,first = check_math_signe(fichier, filename, line_str, line, header, first, '/')
-    header,first = check_math_signe(fichier, filename, line_str, line, header, first, '*')
     header,first = check_math_signe(fichier, filename, line_str, line, header, first, '%')
     return(header,first)
+
+def check_cologne(fichier, filename, line_str, line, header, first):
+    count = len(line_str)
+    if (line_str.endswith("\n")):
+        count -= 1
+    if (count > 80):
+        header,first = do_header(filename, header, first)
+        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many columns ('+str(count)+' > 80)'+colors.reset)
+    return(header,first)
+
+def detect_fc(fichier, filename, line_str, line, indentation, fc_start):
+    if (line_str.find("(") != -1):
+        fc_start = True
+    if (line_str.find("{") != -1):
+        indentation = 1
+    return(indentation, fc_start)
+
+def check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start):
+    if (fc_start == False):
+        if (line_str.find("#include") != -1):
+            include = True
+        if (line_str == "\n"):
+            line_enter_fc = line_enter_fc + 1
+        elif (line_str != "\n"):
+            if (line_enter_fc == 0 and line_str.find("#include") == -1):
+                header,first = do_header(filename, header, first)
+                print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing empty line between functions'+colors.reset)
+            elif (line_enter_fc > 1):
+                header,first = do_header(filename, header, first)
+                print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many empty lines between functions'+colors.reset)
+            line_enter_fc = 0
+    return(header, first, line_enter_fc)
 
 def start(folder_path, first):
     line = 0
@@ -296,6 +328,10 @@ def start(folder_path, first):
                 header = False
                 header,first = check_handler(fichier, filename, header, first)
                 line = 7
+                indentation = 0
+                line_enter_fc = 0
+                include = False
+                fc_start = False
                 while line < nbr_max:
                     line_str = fichier.readline()
                     if (line_str.find("/*") != -1):
@@ -306,9 +342,18 @@ def start(folder_path, first):
                         header,first = do_header(filename, header, first)
                         print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
                     if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//"):
-                        header,first = check_space_after_word(fichier, filename, line_str, line, header, first)
-                        header,first = check_space_with_math_char(fichier, filename, line_str, line, header, first)
+                        if (indentation == 0):
+                            header, first, line_enter_fc= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
+                            indentation,fc_start = detect_fc(fichier, filename, line_str, line, indentation, fc_start)
+                        header,first = check_cologne(fichier, filename, line_str, line, header, first)
+                        header,first = check_space_after_word(fichier, filename, line_str, line, header, first, indentation)
+                        if (indentation != 0):
+                            header,first = check_space_with_math_char(fichier, filename, line_str, line, header, first)
                         header,first = check_training(fichier, filename, line_str, line, header, first)
+                        if (line_str == "}" and indentation == 1):
+                            indentation = 0
+                            line_enter_fc = 0
+                            fc_start = False
                     elif (line_str.find("*/") != -1):
                         com = False
                     line = line + 1

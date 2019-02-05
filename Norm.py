@@ -40,37 +40,61 @@ def do_header(filename, header, first):
     if (header == False):
         header = True
         if (first == True):
-            print("")
+            if (writeinfile == False):
+                print("")
+            elif (writeinfile == True):
+                filenamewrite.write("\n")
         else:
             first = True
-        print(colors.fg.purple+'['+os.path.normpath(filename)+'] :')
+        if (writeinfile == False):
+            print(colors.fg.purple+'['+os.path.normpath(filename)+'] :')
+        elif (writeinfile == True):
+            filenamewrite.write('['+os.path.normpath(filename)+'] :\n')
     return(header, first)
 
 def check_handler(fichier, filename, header, first):
     count = 0
     if (fichier.readline().strip() != "/*"):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+'] Missing or corrupted header\n')
         count = 1
     elif (fichier.readline()[0:20] != "** EPITECH PROJECT, "):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+'] Missing or corrupted header\n')
         count = 2
     elif (fichier.readline()[0:3] != "** "):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+'] Missing or corrupted header\n')
         count = 3
     elif (fichier.readline().strip() != "** File description:"):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+'] Missing or corrupted header\n')
         count = 4
     elif (fichier.readline()[0:3] != "** "):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+'] Missing or corrupted header\n')
         count = 5
     elif (fichier.readline().strip() != "*/"):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+'] Missing or corrupted header'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+'] Missing or corrupted header\n')
         count = 6
     if (count != 0 and count < 6):
         while (count < 6):
@@ -88,9 +112,12 @@ def check_coma(fichier, filename, line_str, line, header, first):
             position = -1
             continue
         remenber = position
-        if (line_str[position+1] != ' '):
+        if (line_str[position+1] != ' ' and line_str[position+1] != '\n'):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after comma'+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after comma'+colors.reset)
+            elif (writeinfile == True):
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after comma\n')
     return(header,first)
 
 def check_return(fichier, filename, line_str, line, header, first):
@@ -98,7 +125,10 @@ def check_return(fichier, filename, line_str, line, header, first):
     if (position != -1):
         if (line_str[position + 6] != ' ' and line_str[position + 6] == '('):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'return\''+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'return\''+colors.reset)
+            elif (writeinfile == True):
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'return\'\n')
     return(header,first)
 
 def check_if(fichier, filename, line_str, line, header, first):
@@ -106,7 +136,10 @@ def check_if(fichier, filename, line_str, line, header, first):
     if (position != -1):
         if (line_str[position + 2] != ' ' and line_str[position + 2] == '('):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'if\''+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'if\''+colors.reset)
+            elif (writeinfile == True):
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'if\'\n')
     return(header,first)
 
 def check_while(fichier, filename, line_str, line, header, first):
@@ -114,13 +147,19 @@ def check_while(fichier, filename, line_str, line, header, first):
     if (position != -1):
         if (line_str[position + 5] != ' ' and line_str[position + 5] == '('):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'while\''+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'while\''+colors.reset)
+            if (writeinfile == True):
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Missing space after keyword \'while\'\n')
     return(header,first)
 
 def check_training(fichier, filename, line_str, line, header, first):
     if (line_str.endswith(" \n") or line_str.endswith("\t\n") or line_str.endswith(" ")):
         header,first = do_header(filename, header, first)
-        print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Trailing space(s) at the end of the line'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Trailing space(s) at the end of the line'+colors.reset)
+        elif (writeinfile == True):
+            filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Trailing space(s) at the end of the line\n')
     return(header,first)
 
 def count_line(filename):
@@ -167,10 +206,16 @@ def check_equal(fichier, filename, line_str, line, header, first):
             remenber = remenber + 1
             if (not_in_quote(line_str, position) and (line_str[position+2] != ' ' or line_str[position-1] != ' ')):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'==\' sign'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'==\' sign'+colors.reset)
+                elif (writeinfile == True):
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'==\' sign\n')
         elif ((line_str[position+1] != ' ' or (line_str[position-1] != ' ' and line_str[position-1] != '!' and line_str[position-1] != '>' and line_str[position-1] != '<' and line_str[position-1] != '+' and line_str[position-1] != '-' and line_str[position-1] != '/' and line_str[position-1] != '%' and line_str[position-1] != '*')) and line_str[position+1] != '\'' and line_str[position-1] != '\'' and not_in_quote(line_str, position)):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'=\' sign'+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'=\' sign'+colors.reset)
+            elif (writeinfile == True):
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'=\' sign\n')
     return(header,first)
 
 def check_sup(fichier, filename, line_str, line, header, first):
@@ -187,10 +232,16 @@ def check_sup(fichier, filename, line_str, line, header, first):
             remenber = remenber + 1
             if (not_in_quote(line_str, position) and (line_str[position+2] != ' ' or line_str[position-1] != ' ')):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'>=\' sign'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'>=\' sign'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'>=\' sign\n')
         elif ((line_str[position+1] != ' ' or line_str[position-1] != ' ') and line_str[position+1] != '\'' and line_str[position-1] != '\'' and not_in_quote(line_str, position)):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'>\' sign'+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'>\' sign'+colors.reset)
+            else:
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'>\' sign\n')
     return(header,first)
 
 def check_inf(fichier, filename, line_str, line, header, first):
@@ -207,10 +258,16 @@ def check_inf(fichier, filename, line_str, line, header, first):
             remenber = remenber + 1
             if (not_in_quote(line_str, position) and (line_str[position+2] != ' ' or line_str[position-1] != ' ')):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'<=\' sign'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'<=\' sign'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'<=\' sign\n')
         elif ((line_str[position+1] != ' ' or line_str[position-1] != ' ') and line_str[position+1] != '\'' and line_str[position-1] != '\'' and not_in_quote(line_str, position)):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'<\' sign'+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'<\' sign'+colors.reset)
+            else:
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'<\' sign\n')
     return(header,first)
 
 def check_dif(fichier, filename, line_str, line, header, first):
@@ -227,7 +284,10 @@ def check_dif(fichier, filename, line_str, line, header, first):
             remenber = remenber + 1
             if (not_in_quote(line_str, position) and (line_str[position+2] != ' ' or line_str[position-1] != ' ')):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'!=\' sign'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'!=\' sign'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \'!=\' sign\n')
     return(header,first)
 
 def check_comp_signe(fichier, filename, line_str, line, header, first, signe):
@@ -242,7 +302,10 @@ def check_comp_signe(fichier, filename, line_str, line, header, first, signe):
         remenber = position + 1
         if (not_in_quote(line_str, position) and ((line_str[position+2] != ' ' and line_str[position+2] != '\n') or line_str[position-1] != ' ')):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'\' sign'+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'\' sign'+colors.reset)
+            else:
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'\' sign\n')
     return(header,first)
 
 def check_math_signe(fichier, filename, line_str, line, header, first, signe):
@@ -259,15 +322,24 @@ def check_math_signe(fichier, filename, line_str, line, header, first, signe):
             remenber = remenber + 1
             if (not_in_quote(line_str, position) and (line_str[position+2] != ' ' or line_str[position-1] != ' ')):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'=\' sign'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'=\' sign'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'=\' sign\n')
         elif (line_str[position:position+2] == "++" or line_str[position:position+2] == "--"):
             remenber = remenber + 1
             if (not_in_quote(line_str, position) and ((line_str[position+2] != ' ' and line_str[position+2] != ';') or line_str[position-1] == ' ')):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+signe+'\' sign'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+signe+'\' sign'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+signe+'\' sign\n')
         elif ((line_str[position+1] != ' ' or line_str[position-1] != ' ') and line_str[position+1] != '\'' and line_str[position-1] != '\'' and not_in_quote(line_str, position)):
             header,first = do_header(filename, header, first)
-            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'\' sign'+colors.reset)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'\' sign'+colors.reset)
+            else:
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Misplaced space(s) around \''+signe+'\' sign\n')
     return(header,first)
 
 def check_space_with_math_char(fichier, filename, line_str, line, header, first):
@@ -289,7 +361,10 @@ def check_cologne(fichier, filename, line_str, line, header, first):
         count -= 1
     if (count > 80):
         header,first = do_header(filename, header, first)
-        print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many columns ('+str(count)+' > 80)'+colors.reset)
+        if (writeinfile == False):
+            print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many columns ('+str(count)+' > 80)'+colors.reset)
+        else:
+            filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Too many columns ('+str(count)+' > 80)\n')
     return(header,first)
 
 def detect_fc(fichier, filename, line_str, line, indentation, fc_start):
@@ -308,10 +383,16 @@ def check_returnline(fichier, filename, line_str, line, header, first, line_ente
         elif (line_str != "\n"):
             if (line_enter_fc == 0 and line_str.find("#include") == -1):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing empty line between functions'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing empty line between functions'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Missing empty line between functions\n')
             elif (line_enter_fc > 1):
                 header,first = do_header(filename, header, first)
-                print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many empty lines between functions'+colors.reset)
+                if (writeinfile == False):
+                    print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many empty lines between functions'+colors.reset)
+                else:
+                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Too many empty lines between functions\n')
             line_enter_fc = 0
     return(header, first, line_enter_fc)
 
@@ -337,10 +418,16 @@ def start(folder_path, first):
                     if (line_str.find("/*") != -1):
                         com = True
                         header,first = do_header(filename, header, first)
-                        print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
+                        if (writeinfile == False):
+                            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
+                        else:
+                            filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
                     elif (line_str.strip()[0:2] == "**" or line_str.strip()[0:2] == "//"):
                         header,first = do_header(filename, header, first)
-                        print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
+                        if (writeinfile == False):
+                            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
+                        else:
+                            filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
                     if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//"):
                         if (indentation == 0):
                             header, first, line_enter_fc= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
@@ -357,13 +444,25 @@ def start(folder_path, first):
                     elif (line_str.find("*/") != -1):
                         com = False
                     line = line + 1
+                fichier.close()
 
 first = False
+global writeinfile
+global filenamewrite
+writeinfile = False
+argument = 0
 if (len(sys.argv) == 1):
     start(".", first)
 ##elif (sys.argv[1] == "-h"):
 else:
     count = 1
     while (count < len(sys.argv)):
-        start(sys.argv[count], first)
+        if (sys.argv[count].startswith("--log-file=")):
+            writeinfile = True
+            filenamewrite = open(sys.argv[count][11:], "w+")
+            argument += 1
+        else:
+            start(sys.argv[count], first)
         count = count + 1
+    if (argument + 1 == count):
+        start(".", first)

@@ -371,7 +371,7 @@ def detect_fc(fichier, filename, line_str, line, indentation, fc_start):
     if (line_str.find("(") != -1):
         fc_start = True
     if (line_str.find("{") != -1):
-        indentation = 1
+        indentation = 4
     return(indentation, fc_start)
 
 def check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start):
@@ -408,6 +408,54 @@ def check_type_of_indentation(fichier, filename, line_str, line, header, first):
         count += 1
     return(header, first)
 
+def detect_lvlindent(fichier, filename, line_str, line, header, first, indentation, para_in_boucle, para_in_boucle_start):
+    count = 0
+    lvl_act = 0
+    if (line_str.replace('\n','').find("}") != -1):
+        indentation -= 4
+    if (line_str.replace(' ','').replace('\t','') != "\n"):
+        while (line_str[count] == ' ' or line_str[count] == '\t'):
+            if (line_str[count] == '\t'):
+                lvl_act += 4
+            else:
+                lvl_act += 1
+            count += 1
+        if (lvl_act != indentation):
+            header,first = do_header(filename, header, first)
+            if (writeinfile == False):
+                print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Wrong indentation ('+str(lvl_act)+' != ' +str(indentation)+')'+colors.reset)
+            else:
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Wrong indentation ('+str(lvl_act)+' != ' +str(indentation)+')\n')
+    if (para_in_boucle_start == True and para_in_boucle == 0):
+        indentation -= 4
+        para_in_boucle_start = False
+    if (line_str.replace('\n','').endswith("{")):
+        indentation += 4
+    elif ((line_str.find("if (") != -1 or line_str.find("if(") != -1 or line_str.find("while (") != -1 or line_str.find("while(") != -1 or line_str.find("else\n") != -1 or line_str.find("else ") != -1) and para_in_boucle_start == False):
+        para_in_boucle_start = True
+        para_in_boucle += 1
+    if (para_in_boucle != 0 and para_in_boucle_start == True):
+        position = 0
+        while (position != -1):
+            try:
+                position = line_str.index("(",position + 1)
+            except:
+                position = -1
+                continue
+            para_in_boucle += 1
+        position = 0
+        while (position != -1):
+            try:
+                position = line_str.index(")",position + 1)
+            except:
+                position = -1
+                continue
+            para_in_boucle -= 1
+        if (para_in_boucle_start == True and para_in_boucle == 1):
+            indentation += 4
+            para_in_boucle = 0
+    return(header, first, indentation, para_in_boucle, para_in_boucle_start)
+
 def start(folder_path, first):
     line = 0
     nbr_max = 0
@@ -432,6 +480,9 @@ def start(folder_path, first):
                 line_enter_fc = 0
                 include = False
                 fc_start = False
+                fc_line = 0
+                para_in_boucle = 0
+                para_in_boucle_start = False
                 while line < nbr_max:
                     line_str = fichier.readline()
                     if (line_str.find("/*") != -1):
@@ -450,18 +501,28 @@ def start(folder_path, first):
                             else:
                                 filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
                     if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//"):
+                        if (indentation != 0 and fc_start == True):
+                            header, first, indentation, para_in_boucle, para_in_boucle_start = detect_lvlindent(fichier, filename, line_str, line, header, first, indentation, para_in_boucle, para_in_boucle_start)
                         if (indentation == 0):
                             header, first, line_enter_fc, include= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
                             indentation,fc_start = detect_fc(fichier, filename, line_str, line, indentation, fc_start)
+                        if (indentation != 0 and fc_start == True):
+                            fc_line += 1
                         header,first = check_cologne(fichier, filename, line_str, line, header, first)
                         header,first = check_type_of_indentation(fichier, filename, line_str, line, header, first)
                         header,first = check_space_after_word(fichier, filename, line_str, line, header, first, indentation)
                         if (indentation != 0):
                             header,first = check_space_with_math_char(fichier, filename, line_str, line, header, first)
                         header,first = check_training(fichier, filename, line_str, line, header, first)
-                        if (line_str == "}" and indentation == 1):
-                            indentation = 0
+                        if (line_str[0] == "}" and indentation == 0):
+                            if (fc_line - 2 > 20):
+                                header,first = do_header(filename, header, first)
+                                if (writeinfile == False):
+                                    print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Too many lines in fonction ('+str(fc_line-2)+' > 20)'+colors.reset)
+                                else:
+                                    filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Too many lines in fonction ('+str(fc_line-2)+' > 20)\n')
                             line_enter_fc = 0
+                            fc_line = 0
                             fc_start = False
                     elif (line_str.find("*/") != -1):
                         com = False

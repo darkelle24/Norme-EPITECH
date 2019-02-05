@@ -47,7 +47,7 @@ def do_header(filename, header, first):
         else:
             first = True
         if (writeinfile == False):
-            print(colors.fg.purple+'['+os.path.normpath(filename)+'] :')
+            print(colors.fg.purple+'['+os.path.normpath(filename)+'] :'+colors.reset)
         elif (writeinfile == True):
             filenamewrite.write('['+os.path.normpath(filename)+'] :\n')
     return(header, first)
@@ -376,12 +376,12 @@ def detect_fc(fichier, filename, line_str, line, indentation, fc_start):
 
 def check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start):
     if (fc_start == False):
-        if (line_str.find("#include") != -1):
+        if (line_str.find("#include") != -1 or line_str.startswith("#") != -1):
             include = True
         if (line_str == "\n"):
             line_enter_fc = line_enter_fc + 1
         elif (line_str != "\n"):
-            if (line_enter_fc == 0 and line_str.find("#include") == -1):
+            if (line_enter_fc == 0 and line_str.find("#include") == -1 and line_str.replace(' ','')[0] != '#'):
                 header,first = do_header(filename, header, first)
                 if (writeinfile == False):
                     print(colors.fg.red+colors.bold+'    ['+os.path.normpath(filename)+':'+str(line)+'] Missing empty line between functions'+colors.reset)
@@ -394,7 +394,19 @@ def check_returnline(fichier, filename, line_str, line, header, first, line_ente
                 else:
                     filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Too many empty lines between functions\n')
             line_enter_fc = 0
-    return(header, first, line_enter_fc)
+    return(header, first, line_enter_fc, include)
+
+def check_type_of_indentation(fichier, filename, line_str, line, header, first):
+    count = 0
+    while (line_str[count] == " " or line_str[count] == "\t"):
+        if (line_str[count] == '\t'):
+            header,first = do_header(filename, header, first)
+            if (writeinfile == False):
+                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] Wrong indentation: tabulations are not allowed'+colors.reset)
+            else:
+                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] Wrong indentation: tabulations are not allowed\n')
+        count += 1
+    return(header, first)
 
 def start(folder_path, first):
     line = 0
@@ -404,7 +416,14 @@ def start(folder_path, first):
         for filename in files:
             if (filename[-2] == "." and (filename[-1] == "h" or filename[-1] == "c")):
                 filename = os.path.join(path, filename)
-                fichier = open(filename, "r")
+                try:
+                    fichier = open(filename, "r")
+                except:
+                    if (writeinfile == False):
+                        print(colors.fg.red+colors.bold+'Open problem with file :'+os.path.normpath(filename)+colors.reset)
+                    else:
+                        filenamewrite.write('Open problem with file :'+os.path.normpath(filename)+'\n')
+                    continue
                 nbr_max = count_line(filename) + 1
                 header = False
                 header,first = check_handler(fichier, filename, header, first)
@@ -417,22 +436,25 @@ def start(folder_path, first):
                     line_str = fichier.readline()
                     if (line_str.find("/*") != -1):
                         com = True
-                        header,first = do_header(filename, header, first)
-                        if (writeinfile == False):
-                            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
-                        else:
-                            filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
+                        if (filename[-1] != "h"):
+                            header,first = do_header(filename, header, first)
+                            if (writeinfile == False):
+                                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
+                            else:
+                                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
                     elif (line_str.strip()[0:2] == "**" or line_str.strip()[0:2] == "//"):
-                        header,first = do_header(filename, header, first)
-                        if (writeinfile == False):
-                            print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
-                        else:
-                            filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
+                        if (filename[-1] != "h"):
+                            header,first = do_header(filename, header, first)
+                            if (writeinfile == False):
+                                print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
+                            else:
+                                filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
                     if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//"):
                         if (indentation == 0):
-                            header, first, line_enter_fc= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
+                            header, first, line_enter_fc, include= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
                             indentation,fc_start = detect_fc(fichier, filename, line_str, line, indentation, fc_start)
                         header,first = check_cologne(fichier, filename, line_str, line, header, first)
+                        header,first = check_type_of_indentation(fichier, filename, line_str, line, header, first)
                         header,first = check_space_after_word(fichier, filename, line_str, line, header, first, indentation)
                         if (indentation != 0):
                             header,first = check_space_with_math_char(fichier, filename, line_str, line, header, first)
@@ -446,6 +468,14 @@ def start(folder_path, first):
                     line = line + 1
                 fichier.close()
 
+def write_heaer_file():
+    filenamewrite.write("Normcheck, a norm error detector\nCopyright (C) 2019, by Djilani CARDINEAU\nFor futher info : ./Norm.py -h\nCommand: ")
+    count = 0
+    while (count < len(sys.argv)):
+        filenamewrite.write(sys.argv[count]+" ")
+        count += 1
+    filenamewrite.write("\n\n")
+
 first = False
 global writeinfile
 global filenamewrite
@@ -453,7 +483,15 @@ writeinfile = False
 argument = 0
 if (len(sys.argv) == 1):
     start(".", first)
-##elif (sys.argv[1] == "-h"):
+elif (sys.argv[1] == "-h"):
+    print("USAGE:\n   DESCRIPTION:")
+    print("      Normcheck, a norm epitech error detector\n")
+    print("   FLAG:")
+    print("      -h")
+    print("         Display the usage")
+    print("      --log-file=<path>")
+    print("         Write in file the result of Norm.py")
+    print("\nCopyright (C) 2019, by Djilani CARDINEAU")
 else:
     count = 1
     while (count < len(sys.argv)):
@@ -461,7 +499,11 @@ else:
             writeinfile = True
             filenamewrite = open(sys.argv[count][11:], "w+")
             argument += 1
-        else:
+            write_heaer_file()
+        count += 1
+    count = 1
+    while (count < len(sys.argv)):
+        if (sys.argv[count].startswith("--log-file=") == False):
             start(sys.argv[count], first)
         count = count + 1
     if (argument + 1 == count):

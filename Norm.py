@@ -493,6 +493,8 @@ def start(folder_path, first):
                                 print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
                             else:
                                 filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
+                    elif (line_str.find("*/") != -1):
+                        com = False
                     elif (line_str.strip()[0:2] == "**" or line_str.strip()[0:2] == "//"):
                         if (filename[-1] != "h"):
                             header,first = do_header(filename, header, first)
@@ -500,7 +502,7 @@ def start(folder_path, first):
                                 print(colors.fg.green+'    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)'+colors.reset)
                             else:
                                 filenamewrite.write('    ['+os.path.normpath(filename)+':'+str(line)+'] You have leave(s) some comment(s)\n')
-                    if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//"):
+                    if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//" and line_str.find("*/") == -1):
                         if (indentation != 0 and fc_start == True):
                             header, first, indentation, para_in_boucle, para_in_boucle_start = detect_lvlindent(fichier, filename, line_str, line, header, first, indentation, para_in_boucle, para_in_boucle_start)
                         elif (indentation == 0):

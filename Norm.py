@@ -503,8 +503,9 @@ def start(folder_path, first):
                     if (com == False and line_str.strip()[0:2] != "**" and line_str.strip()[0:2] != "//"):
                         if (indentation != 0 and fc_start == True):
                             header, first, indentation, para_in_boucle, para_in_boucle_start = detect_lvlindent(fichier, filename, line_str, line, header, first, indentation, para_in_boucle, para_in_boucle_start)
-                        if (indentation == 0):
-                            header, first, line_enter_fc, include= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
+                        elif (indentation == 0):
+                            if (filename[-1] != "h"):
+                                header, first, line_enter_fc, include= check_returnline(fichier, filename, line_str, line, header, first, line_enter_fc, include, fc_start)
                             indentation,fc_start = detect_fc(fichier, filename, line_str, line, indentation, fc_start)
                         if (indentation != 0 and fc_start == True):
                             fc_line += 1

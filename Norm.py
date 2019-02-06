@@ -413,6 +413,8 @@ def detect_lvlindent(fichier, filename, line_str, line, header, first, indentati
     lvl_act = 0
     if (line_str.replace('\n','').find("}") != -1):
         indentation -= 4
+        para_in_boucle_start = False
+        para_in_boucle = 0
     if (line_str.replace(' ','').replace('\t','') != "\n"):
         while (line_str[count] == ' ' or line_str[count] == '\t'):
             if (line_str[count] == '\t'):
@@ -431,6 +433,7 @@ def detect_lvlindent(fichier, filename, line_str, line, header, first, indentati
         para_in_boucle_start = False
     if (line_str.replace('\n','').endswith("{")):
         indentation += 4
+        para_in_boucle_start = False
     elif ((line_str.find("if (") != -1 or line_str.find("if(") != -1 or line_str.find("while (") != -1 or line_str.find("while(") != -1 or line_str.find("else\n") != -1 or line_str.find("else ") != -1) and para_in_boucle_start == False):
         para_in_boucle_start = True
         para_in_boucle += 1
